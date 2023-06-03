@@ -2,7 +2,8 @@ package main
 
 type savage struct {
 	ID           int    // The id of the savage and also the primary key.
-	Update       bool   // If the savage needs to be updated.
+	OwnerID      int    // The id of the owner of the savage.
+	Updated      bool   // If the savage needs to be updated.
 	Location     int    // The location of the savage. Y * maxX + X
 	FirstName    string // The first name of the savage.
 	LastName     string // The last name of the savage.

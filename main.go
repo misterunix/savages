@@ -13,6 +13,7 @@ import (
 
 func main() {
 	fmt.Println("Starting Savages.")
+	fmt.Println("Version:", VERSION)
 
 	rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
 
@@ -33,6 +34,7 @@ func main() {
 			os.Exit(1)
 		}
 		defer database.Close()
+
 		s := CreateTableFromStruct("savage", savage{})
 		fmt.Println(s)
 		statement, err := database.Prepare(s)
@@ -45,12 +47,13 @@ func main() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-
+		fmt.Println("Created a new database.")
 		os.Exit(0)
+
 	}
 
 	if generation0 {
-
+		fmt.Println("Generating a new generation 0.")
 		database, err := sql.Open("sqlite", "db/savages.db")
 		if err != nil {
 			fmt.Println(err)
@@ -73,7 +76,8 @@ func main() {
 		for i := 0; i < gen0Count; i++ {
 			g := savage{}
 			g.ID = i
-			g.Update = false
+			g.OwnerID = 0
+			g.Updated = false
 			g.FirstName = "Gen"
 			g.LastName = "Zero"
 			g.Location = XY2Index(rnd.Intn(maxX), rnd.Intn(maxY))
@@ -117,6 +121,8 @@ func main() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+
+		fmt.Println("Generated a new generation 0.")
 		os.Exit(0)
 	}
 
@@ -132,7 +138,7 @@ func main() {
 }
 
 func RunDay() {
-
+	fmt.Println("Running a day.")
 	/*
 		database, err := sql.Open("sqlite", "db/savages.db")
 		if err != nil {
@@ -175,6 +181,8 @@ func RunDay() {
 		ss := savage{}
 		rows.Scan(
 			&ss.ID,
+			&ss.OwnerID,
+			&ss.Updated,
 			&ss.Location,
 			&ss.FirstName,
 			&ss.LastName,
@@ -201,7 +209,7 @@ func RunDay() {
 	rows.Close()
 
 	for i := 0; i < c; i++ {
-		savages[i].Update = true
+		savages[i].Updated = true
 		savages[i].Age++
 	}
 

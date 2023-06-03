@@ -5,6 +5,8 @@ import (
 	"math/rand"
 )
 
+const VERSION = "0.0.0a"
+
 const (
 	maxX = 100
 	maxY = 100

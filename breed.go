@@ -11,7 +11,15 @@ func breed(id1, id2 int) {
 
 	newSavage.ID = getNextSavageID()
 
-	newSavage.Update = false
+	if savages[id1].Sex == 1 {
+		savages[id1].Pregnant = 10
+		savages[id1].Updated = true
+	} else {
+		savages[id2].Pregnant = 10
+		savages[id2].Updated = true
+	}
+
+	newSavage.Updated = false
 
 	if rnd.Intn(100) <= 50 {
 		newSavage.Location = savages[id1].Location
@@ -27,6 +35,12 @@ func breed(id1, id2 int) {
 		newSavage.Sex = 0
 	} else {
 		newSavage.Sex = 1
+	}
+
+	if rnd.Intn(100) <= 50 {
+		newSavage.OwnerID = savages[id1].OwnerID
+	} else {
+		newSavage.OwnerID = savages[id2].OwnerID
 	}
 
 	if rnd.Intn(100) <= 50 {
