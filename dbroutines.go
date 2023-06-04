@@ -1,10 +1,12 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"os"
 
 	_ "github.com/glebarez/go-sqlite"
+	"github.com/misterunix/sniffle/hashing"
 
 	"reflect"
 )
@@ -131,7 +133,7 @@ func CreateTableFromStruct(table string, s interface{}) string {
 
 	var sqlstatement string
 
-	os.Remove("db/savages.db")
+	//os.Remove("db/savages.db")
 
 	sqlstatement1 := "CREATE TABLE " + table + " ("
 	for i := 0; i < reflectedValue.NumField(); i++ {
@@ -184,4 +186,113 @@ func CreateTableFromStruct(table string, s interface{}) string {
 	sqlstatement = sqlstatement1 + sqlstatement
 
 	return sqlstatement
+}
+
+// Remove any of the tables in the database.
+func DropTable(d *sql.DB, table string) {
+	//fmt.Println("Drop table:", table)
+	s := fmt.Sprintf("DROP TABLE IF EXISTS %s;", table)
+	fmt.Println(s)
+	statement, _ := d.Prepare(s)
+	_, err := statement.Exec()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+// Create a new DB
+func CreateDB(d *sql.DB) {
+	s := CreateTableFromStruct("savage", savage{})
+	fmt.Println(s)
+	statement, err := d.Prepare(s)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	_, err = statement.Exec()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	statement.Close()
+
+	s = CreateTableFromStruct("gamedb", gamedb{})
+	fmt.Println(s)
+	statement, err = d.Prepare(s)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	_, err = statement.Exec()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	statement.Close()
+
+	s = CreateTableFromStruct("birthrecords", birthrecord{})
+	fmt.Println(s)
+	statement, err = d.Prepare(s)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	_, err = statement.Exec()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	statement.Close()
+
+	s = CreateTableFromStruct("logging", log{})
+	fmt.Println(s)
+	statement, err = d.Prepare(s)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	_, err = statement.Exec()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	statement.Close()
+
+	s = CreateTableFromStruct("users", user{})
+	fmt.Println(s)
+	statement, err = d.Prepare(s)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	_, err = statement.Exec()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	statement.Close()
+
+	u := user{}
+	u.ID = 0
+	u.Username = "admin"
+	u.Email = "admin@localhost"
+	u.Password = hashing.StringHash(hashing.SHA256, "DefaultFuckingPassword")
+	s = InsertIntoTable("users", u)
+	fmt.Println(s)
+	statement, err = d.Prepare(s)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	_, err = statement.Exec()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	statement.Close()
+
+	fmt.Println("Created a new database.")
+	os.Exit(0)
+
 }

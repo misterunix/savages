@@ -9,7 +9,6 @@ import (
 	"time"
 
 	_ "github.com/glebarez/go-sqlite"
-	"github.com/misterunix/sniffle/hashing"
 )
 
 func main() {
@@ -36,98 +35,13 @@ func main() {
 		}
 		defer database.Close()
 
-		s := CreateTableFromStruct("savage", savage{})
-		fmt.Println(s)
-		statement, err := database.Prepare(s)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		_, err = statement.Exec()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		statement.Close()
+		DropTable(database, "savage")
+		DropTable(database, "gamedb")
+		DropTable(database, "birthrecords")
+		DropTable(database, "logging")
+		DropTable(database, "users")
 
-		s = CreateTableFromStruct("gamedb", gamedb{})
-		fmt.Println(s)
-		statement, err = database.Prepare(s)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		_, err = statement.Exec()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		statement.Close()
-
-		s = CreateTableFromStruct("birthrecords", birthrecord{})
-		fmt.Println(s)
-		statement, err = database.Prepare(s)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		_, err = statement.Exec()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		statement.Close()
-
-		s = CreateTableFromStruct("logging", log{})
-		fmt.Println(s)
-		statement, err = database.Prepare(s)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		_, err = statement.Exec()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		statement.Close()
-
-		s = CreateTableFromStruct("users", user{})
-		fmt.Println(s)
-		statement, err = database.Prepare(s)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		_, err = statement.Exec()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		statement.Close()
-
-		u := user{}
-		u.ID = 0
-		u.Username = "admin"
-		u.Email = "admin@localhost"
-		u.Password = hashing.StringHash(hashing.SHA256, "DefaultFuckingPassword")
-		s = InsertIntoTable("users", u)
-		fmt.Println(s)
-		statement, err = database.Prepare(s)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		_, err = statement.Exec()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		statement.Close()
-
-		fmt.Println("Created a new database.")
-		os.Exit(0)
-
+		CreateDB(database)
 	}
 
 	if generation0 {
@@ -257,6 +171,7 @@ func RunDay() {
 	}
 	for i := 0; rows.Next(); i++ {
 		ss := savage{}
+
 		rows.Scan(
 			&ss.ID,
 			&ss.OwnerID,
@@ -282,6 +197,7 @@ func RunDay() {
 			&ss.Dexterity,
 			&ss.Constitution,
 		)
+
 		savages = append(savages, ss)
 	}
 	rows.Close()
