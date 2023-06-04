@@ -133,7 +133,7 @@ func CreateTableFromStruct(table string, s interface{}) string {
 
 	os.Remove("db/savages.db")
 
-	sqlstatement1 := "CREATE TABLE IF NOT EXISTS " + table + " ("
+	sqlstatement1 := "CREATE TABLE " + table + " ("
 	for i := 0; i < reflectedValue.NumField(); i++ {
 		var vt string
 		varName := reflectedValue.Type().Field(i).Name // get the name of the field
@@ -180,7 +180,7 @@ func CreateTableFromStruct(table string, s interface{}) string {
 
 	// such a crappy way to do this. Return to this at a later date.
 	sqlstatement = sqlstatement[1:] // remove the first comma
-	sqlstatement += ")"
+	sqlstatement += ");"
 	sqlstatement = sqlstatement1 + sqlstatement
 
 	return sqlstatement

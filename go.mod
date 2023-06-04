@@ -2,7 +2,10 @@ module savages
 
 go 1.20
 
-require github.com/glebarez/go-sqlite v1.21.1
+require (
+	github.com/glebarez/go-sqlite v1.21.1
+	github.com/misterunix/sniffle v1.0.1
+)
 
 require (
 	github.com/dustin/go-humanize v1.0.1 // indirect

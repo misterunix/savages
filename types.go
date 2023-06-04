@@ -31,3 +31,30 @@ type distance struct {
 	ID2      int
 	Distance int
 }
+
+type user struct {
+	ID       int
+	Username string
+	Email    string
+	Password string
+}
+
+type log struct {
+	ID      int
+	Date    int
+	Who     int
+	Message string
+}
+
+type gamedb struct {
+	ID  int
+	Day int
+}
+
+type birthrecord struct {
+	ID       int
+	Date     int
+	ChildID  int
+	MotherID int
+	FatherID int
+}

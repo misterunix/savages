@@ -9,6 +9,7 @@ import (
 	"time"
 
 	_ "github.com/glebarez/go-sqlite"
+	"github.com/misterunix/sniffle/hashing"
 )
 
 func main() {
@@ -47,6 +48,83 @@ func main() {
 			fmt.Println(err)
 			os.Exit(1)
 		}
+		statement.Close()
+
+		s = CreateTableFromStruct("gamedb", gamedb{})
+		fmt.Println(s)
+		statement, err = database.Prepare(s)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		_, err = statement.Exec()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		statement.Close()
+
+		s = CreateTableFromStruct("birthrecords", birthrecord{})
+		fmt.Println(s)
+		statement, err = database.Prepare(s)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		_, err = statement.Exec()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		statement.Close()
+
+		s = CreateTableFromStruct("logging", log{})
+		fmt.Println(s)
+		statement, err = database.Prepare(s)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		_, err = statement.Exec()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		statement.Close()
+
+		s = CreateTableFromStruct("users", user{})
+		fmt.Println(s)
+		statement, err = database.Prepare(s)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		_, err = statement.Exec()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		statement.Close()
+
+		u := user{}
+		u.ID = 0
+		u.Username = "admin"
+		u.Email = "admin@localhost"
+		u.Password = hashing.StringHash(hashing.SHA256, "DefaultFuckingPassword")
+		s = InsertIntoTable("users", u)
+		fmt.Println(s)
+		statement, err = database.Prepare(s)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		_, err = statement.Exec()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		statement.Close()
+
 		fmt.Println("Created a new database.")
 		os.Exit(0)
 
