@@ -29,10 +29,7 @@ func main() {
 	if createnewdb {
 		fmt.Println("Creating a new database.")
 		database, err := sql.Open("sqlite", "db/savages.db")
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		_ = CheckErr(err, true)
 		defer database.Close()
 
 		DropTable(database, "savage")
@@ -47,23 +44,14 @@ func main() {
 	if generation0 {
 		fmt.Println("Generating a new generation 0.")
 		database, err := sql.Open("sqlite", "db/savages.db")
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		_ = CheckErr(err, true)
 		defer database.Close()
 
 		o := "BEGIN;\n"
 		beginstatement, err := database.Prepare(o)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		_ = CheckErr(err, true)
 		_, err = beginstatement.Exec()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		_ = CheckErr(err, true)
 
 		for i := 0; i < gen0Count; i++ {
 			g := savage{}
@@ -92,37 +80,22 @@ func main() {
 			g.Pregnant = -1
 			s := InsertIntoTable("savage", g)
 			statement, err := database.Prepare(s)
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
+			_ = CheckErr(err, true)
 			_, err = statement.Exec()
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
+			_ = CheckErr(err, true)
 		}
 		o = "COMMIT;\n"
 		beginstatement, err = database.Prepare(o)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		_ = CheckErr(err, true)
 		_, err = beginstatement.Exec()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		_ = CheckErr(err, true)
 
 		fmt.Println("Generated a new generation 0.")
 		os.Exit(0)
 	}
 
 	database, err = sql.Open("sqlite", "db/savages.db")
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	_ = CheckErr(err, true)
 	defer database.Close()
 
 	RunDay()
@@ -139,17 +112,18 @@ func RunDay() {
 		}
 		defer database.Close()
 	*/
+
+	s := "UPDATE gamedb SET day = day + 1 WHERE ID='0';"
+	statement, err := database.Prepare(s)
+	_ = CheckErr(err, true)
+	_, err = statement.Exec()
+	_ = CheckErr(err, true)
+
 	countSQL := "SELECT COUNT(*) FROM savage WHERE health > 0;"
-	statement, err := database.Prepare(countSQL)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	statement, err = database.Prepare(countSQL)
+	_ = CheckErr(err, true)
 	rows, err := statement.Query()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	_ = CheckErr(err, true)
 	var c int // count of alive savages
 	for rows.Next() {
 		rows.Scan(&c)
@@ -160,15 +134,9 @@ func RunDay() {
 	//savages := make([]savage, c)
 	savagesSQL := "SELECT * FROM savage WHERE health > 0;"
 	statement, err = database.Prepare(savagesSQL)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	_ = CheckErr(err, true)
 	rows, err = statement.Query()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	_ = CheckErr(err, true)
 	for i := 0; rows.Next(); i++ {
 		ss := savage{}
 
@@ -232,40 +200,22 @@ func RunDay() {
 	//
 	o := "BEGIN;\n"
 	beginstatement, err := database.Prepare(o)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	_ = CheckErr(err, true)
 	_, err = beginstatement.Exec()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	_ = CheckErr(err, true)
 	for i := 0; i < c; i++ {
 		id := savages[i].ID
 		sql1 := "UPDATE savage SET age = age + 1 WHERE id = '" + fmt.Sprintf("%d", id) + "';"
 		statement, err := database.Prepare(sql1)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		_ = CheckErr(err, true)
 		_, err = statement.Exec()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+		_ = CheckErr(err, true)
 	}
 	o = "COMMIT;\n"
 	beginstatement, err = database.Prepare(o)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	_ = CheckErr(err, true)
 	_, err = beginstatement.Exec()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	_ = CheckErr(err, true)
 
 	//
 	//
@@ -299,15 +249,9 @@ func getNextSavageID() int {
 
 	sql1 := "SELECT MAX(ID) FROM savage;"
 	statement, err := database.Prepare(sql1)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	_ = CheckErr(err, true)
 	rows, err := statement.Query()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	_ = CheckErr(err, true)
 	for i := 0; rows.Next(); i++ {
 		rows.Scan(&lastID)
 	}

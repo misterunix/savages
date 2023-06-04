@@ -1,10 +1,5 @@
 package main
 
-import (
-	"fmt"
-	"os"
-)
-
 func breed(id1, id2 int) {
 
 	newSavage := savage{}
@@ -111,14 +106,8 @@ func breed(id1, id2 int) {
 
 	s := InsertIntoTable("savage", newSavage)
 	statement, err := database.Prepare(s)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	_ = CheckErr(err, true)
 	_, err = statement.Exec()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	_ = CheckErr(err, true)
 
 }

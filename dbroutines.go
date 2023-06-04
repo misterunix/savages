@@ -292,7 +292,23 @@ func CreateDB(d *sql.DB) {
 	}
 	statement.Close()
 
+	g := gamedb{}
+	g.ID = 0
+	g.Day = 0
+	s = InsertIntoTable("gamedb", g)
+	fmt.Println(s)
+	statement, err = d.Prepare(s)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	_, err = statement.Exec()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	statement.Close()
+
 	fmt.Println("Created a new database.")
 	os.Exit(0)
-
 }
