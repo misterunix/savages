@@ -1,6 +1,6 @@
 # savages
 
-Baswd on my memory of Little Savages 2 by Matt Squirrell.  
+Baswd on my memory of Little Savages 2 by [Matt Squirrell.](http://www.sadcow.co.uk/)
 It has been a very long time since I played the 'game', but I have really fond memories of it.
 
 ## notes
@@ -20,9 +20,12 @@ Help would be very ***nice***!
 
 - Children stay with the mother until the age of 10.  
   - There is a chance if the mother's owner is not the same as the child's owner that the mother will harm the child.
+
 - Need personality modifiers.
   - Kindness / Aggression
   - Good / Bad hunter gatherer
+  - Horny / Prudish
+  - 
   - yadda yadda 
 
 
