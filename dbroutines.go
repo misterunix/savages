@@ -6,6 +6,7 @@ import (
 	"os"
 
 	_ "github.com/glebarez/go-sqlite"
+	"github.com/jmoiron/sqlx"
 	"github.com/misterunix/sniffle/hashing"
 
 	"reflect"
@@ -203,112 +204,133 @@ func DropTable(d *sql.DB, table string) {
 
 // Create a new DB
 func CreateDB(d *sql.DB) {
+	var schema string
+
 	s := CreateTableFromStruct("savage", savage{})
-	fmt.Println(s)
-	statement, err := d.Prepare(s)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	_, err = statement.Exec()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	statement.Close()
-
+	schema += s + "\n\n"
 	s = CreateTableFromStruct("gamedb", gamedb{})
-	fmt.Println(s)
-	statement, err = d.Prepare(s)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	_, err = statement.Exec()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	statement.Close()
-
+	schema += s + "\n\n"
 	s = CreateTableFromStruct("birthrecords", birthrecord{})
-	fmt.Println(s)
-	statement, err = d.Prepare(s)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	_, err = statement.Exec()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	statement.Close()
-
+	schema += s + "\n\n"
 	s = CreateTableFromStruct("logging", log{})
-	fmt.Println(s)
-	statement, err = d.Prepare(s)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	_, err = statement.Exec()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	statement.Close()
-
+	schema += s + "\n\n"
 	s = CreateTableFromStruct("users", user{})
-	fmt.Println(s)
-	statement, err = d.Prepare(s)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	_, err = statement.Exec()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	statement.Close()
+	schema += s + "\n\n"
 
-	u := user{}
-	u.ID = 0
-	u.Username = "admin"
-	u.Email = "admin@localhost"
-	u.Password = hashing.StringHash(hashing.SHA256, "DefaultFuckingPassword")
-	s = InsertIntoTable("users", u)
-	fmt.Println(s)
-	statement, err = d.Prepare(s)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	_, err = statement.Exec()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	statement.Close()
+	dbx, err := sqlx.Connect("sqlite", "db/savages.db")
+	CheckErr(err, true)
 
-	g := gamedb{}
-	g.ID = 0
-	g.Day = 0
-	s = InsertIntoTable("gamedb", g)
-	fmt.Println(s)
-	statement, err = d.Prepare(s)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	_, err = statement.Exec()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	statement.Close()
+	dbx.MustExec(schema)
 
+	/*
+
+		fmt.Println(s)
+		statement, err := d.Prepare(s)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		_, err = statement.Exec()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		statement.Close()
+
+		s = CreateTableFromStruct("gamedb", gamedb{})
+		fmt.Println(s)
+		statement, err = d.Prepare(s)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		_, err = statement.Exec()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		statement.Close()
+
+		s = CreateTableFromStruct("birthrecords", birthrecord{})
+		fmt.Println(s)
+		statement, err = d.Prepare(s)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		_, err = statement.Exec()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		statement.Close()
+
+		s = CreateTableFromStruct("logging", log{})
+		fmt.Println(s)
+		statement, err = d.Prepare(s)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		_, err = statement.Exec()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		statement.Close()
+
+		s = CreateTableFromStruct("users", user{})
+		fmt.Println(s)
+		statement, err = d.Prepare(s)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		_, err = statement.Exec()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		statement.Close()
+
+		u := user{}
+		u.ID = 0
+		u.Username = "admin"
+		u.Email = "admin@localhost"
+		u.Password = hashing.StringHash(hashing.SHA256, "DefaultFuckingPassword")
+		s = InsertIntoTable("users", u)
+		fmt.Println(s)
+		statement, err = d.Prepare(s)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		_, err = statement.Exec()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		statement.Close()
+
+		g := gamedb{}
+		g.ID = 0
+		g.Day = 0
+		s = InsertIntoTable("gamedb", g)
+		fmt.Println(s)
+		statement, err = d.Prepare(s)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		_, err = statement.Exec()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		statement.Close()
+	*/
+	p := hashing.StringHash(hashing.SHA256, "DefaultFuckingPassword")
+	fmt.Println(p)
 	fmt.Println("Created a new database.")
 	os.Exit(0)
 }
