@@ -26,6 +26,11 @@ func main() {
 	flag.BoolVar(&generation0, "gen0", false, "Generate a new generation 0.")
 	flag.Parse()
 
+	var err error
+	dbx, err = sqlx.Connect("sqlite", "db/savages.db")
+	_ = CheckErr(err, true)
+	defer dbx.Close()
+
 	if createnewdb {
 		fmt.Println("Creating a new database.")
 		//database, err := sql.Open("sqlite", "db/savages.db")
@@ -39,7 +44,7 @@ func main() {
 			DropTable(database, "users")
 		*/
 
-		CreateDB(database)
+		CreateDB()
 	}
 
 	if generation0 {
@@ -75,12 +80,12 @@ func main() {
 			g.HungerMax = uint8(rnd.Intn(50) + 50)
 			g.ThirstMax = uint8(rnd.Intn(50) + 50)
 			g.HealthMax = uint8(rnd.Intn(50) + 50)
-			g.Strength = uint8(rnd.Intn(22) + 3)
-			g.Intelligence = uint8(rnd.Intn(22) + 3)
-			g.Charisma = uint8(rnd.Intn(22) + 3)
-			g.Wisdom = uint8(rnd.Intn(22) + 3)
-			g.Dexterity = uint8(rnd.Intn(22) + 3)
-			g.Constitution = uint8(rnd.Intn(22) + 3)
+			g.Strength = uint8(rnd.Intn(18))
+			g.Intelligence = uint8(rnd.Intn(18))
+			g.Charisma = uint8(rnd.Intn(18))
+			g.Wisdom = uint8(rnd.Intn(18))
+			g.Dexterity = uint8(rnd.Intn(18))
+			g.Constitution = uint8(rnd.Intn(18))
 			g.Hunger = g.HungerMax
 			g.Thirst = g.ThirstMax
 			g.Health = g.HealthMax
@@ -102,10 +107,12 @@ func main() {
 		os.Exit(0)
 	}
 
+	//var err error
+	dbx, err = sqlx.Connect("sqlite", "db/savages.db")
+	_ = CheckErr(err, true)
+	defer dbx.Close()
+
 	/*
-
-		dbx, err := sqlx.Connect("sqlite", "db/savages.db")
-
 		database, err = sql.Open("sqlite", "db/savages.db")
 		_ = CheckErr(err, true)
 		defer database.Close()
@@ -195,6 +202,7 @@ func RunDay() {
 	}
 	rows1.Close()
 
+	c := len(savages)
 	/*
 		for i := 0; i < c; i++ {
 			savages[i].Updated = true
@@ -203,20 +211,21 @@ func RunDay() {
 	*/
 
 	// Load the distances into memory.
-	//var distances []distance
+	var distances []distance
 
-	//distances := make([]distance, c*c)
-	/*
-		for i := 0; i < c-1; i++ {
-			for j := i + 1; j < c; j++ {
-				d := distance{}
-				d.ID1 = savages[i].ID
-				d.ID2 = savages[j].ID
-				d.Distance = DistanceSavage(savages[i], savages[j])
+	distances = make([]distance, c*c)
+
+	for i := 0; i < c-1; i++ {
+		for j := i + 1; j < c; j++ {
+			d := distance{}
+			d.ID1 = savages[i].ID
+			d.ID2 = savages[j].ID
+			d.Distance = DistanceSavage(savages[i], savages[j])
+			if d.Distance <= 10 {
 				distances = append(distances, d)
 			}
 		}
-	*/
+	}
 
 	/*
 		for _, s := range savages {

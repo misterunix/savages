@@ -24,6 +24,9 @@ type savage struct {
 	Wisdom       uint8  // The wisdom of the savage.
 	Dexterity    uint8  // The dexterity of the savage.
 	Constitution uint8  // The constitution of the savage.
+	Attribute1   uint8  // How horny.
+	Attribute2   uint8  // How mean.
+	Attribute3   uint8  // The attributes of the savage.
 }
 
 type distance struct {

@@ -64,3 +64,14 @@ main struct for the savages
 
   
 
+Attributes 0 - 25
+- Strength 
+- Intelligence
+- Wisdom
+- Dexterity
+- Charisma
+- Constitution
+
+Total all attributes summed and averaged.
+- `value / 25 = mating chance`
+
