@@ -138,6 +138,9 @@ func RunDay() {
 	rows, err = statement.Query()
 	_ = CheckErr(err, true)
 	for i := 0; rows.Next(); i++ {
+		//var ss savage
+		//rows.Scan(&ss)
+
 		ss := savage{}
 
 		rows.Scan(
@@ -165,7 +168,7 @@ func RunDay() {
 			&ss.Dexterity,
 			&ss.Constitution,
 		)
-
+		//fmt.Print("ss: ", ss)
 		savages = append(savages, ss)
 	}
 	rows.Close()
@@ -224,9 +227,9 @@ func RunDay() {
 	fmt.Println("Distances")
 	for _, d := range distances {
 		if d.Distance < 11 {
-			fmt.Println(d)
+			//fmt.Println(d)
 			if savages[d.ID1].Sex != savages[d.ID2].Sex {
-				fmt.Println("Breed?")
+				//fmt.Println("Breed?")
 				if savages[d.ID1].Pregnant != -1 || savages[d.ID2].Pregnant != -1 {
 					// someone is already pregnant
 					continue
