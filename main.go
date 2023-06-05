@@ -33,18 +33,8 @@ func main() {
 
 	if createnewdb {
 		fmt.Println("Creating a new database.")
-		//database, err := sql.Open("sqlite", "db/savages.db")
-		//_ = CheckErr(err, true)
-		//defer database.Close()
-
-		/*	DropTable(database, "savage")
-			DropTable(database, "gamedb")
-			DropTable(database, "birthrecords")
-			DropTable(database, "logging")
-			DropTable(database, "users")
-		*/
-
 		CreateDB()
+		fmt.Println("Created a new database.")
 	}
 
 	if generation0 {
