@@ -1,11 +1,35 @@
 package main
 
-func breed(id1, id2 int) {
+func mating(id1, id2 int) {
 
-	newSavage := Sav{}
+	i1 := (savs[id1].Charisma +
+		savs[id1].Intelligence +
+		savs[id1].Strength +
+		savs[id1].Wisdom +
+		savs[id1].Dexterity +
+		savs[id1].Constitution) / 6
 
-	newSavage.ID = getNextSavageID()
+	i2 := (savs[id2].Charisma +
+		savs[id2].Intelligence +
+		savs[id2].Strength +
+		savs[id2].Wisdom +
+		savs[id2].Dexterity +
+		savs[id2].Constitution) / 6
 
+	var v float64
+	if i1 > i2 {
+		v = float64(i2) / float64(i1)
+	} else {
+		v = float64(i1) / float64(i2)
+	}
+
+	if v > 0.75 {
+		breed(id1, id2)
+	}
+
+}
+
+func SetPregnant(id1, id2 int) {
 	if savs[id1].Sex == 1 {
 		savs[id1].Pregnant = 10
 		savs[id1].Updated = true
@@ -13,6 +37,13 @@ func breed(id1, id2 int) {
 		savs[id2].Pregnant = 10
 		savs[id2].Updated = true
 	}
+}
+
+func breed(id1, id2 int) {
+
+	newSavage := Sav{}
+
+	newSavage.ID = getNextSavageID()
 
 	newSavage.Updated = false
 
