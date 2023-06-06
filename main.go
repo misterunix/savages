@@ -38,61 +38,8 @@ func main() {
 	}
 
 	if generation0 {
-		var err error
-
 		fmt.Println("Generating a new generation 0.")
-
-		dbx, err = sqlx.Connect("sqlite", "db/savages.db")
-		_ = CheckErr(err, true)
-		defer dbx.Close()
-
-		//database, err := sql.Open("sqlite", "db/savages.db")
-		//_ = CheckErr(err, true)
-		//defer database.Close()
-
-		o := "BEGIN;\n"
-		beginstatement, err := database.Prepare(o)
-		_ = CheckErr(err, true)
-		_, err = beginstatement.Exec()
-		_ = CheckErr(err, true)
-
-		for i := 0; i < gen0Count; i++ {
-			g := savage{}
-			g.ID = i
-			g.OwnerID = 0
-			g.Updated = false
-			g.FirstName = "Gen"
-			g.LastName = "Zero"
-			g.Location = XY2Index(rnd.Intn(maxX), rnd.Intn(maxY))
-			g.Age = 0
-			g.FatherID = 0
-			g.MotherID = 0
-			g.HungerMax = uint8(rnd.Intn(50) + 50)
-			g.ThirstMax = uint8(rnd.Intn(50) + 50)
-			g.HealthMax = uint8(rnd.Intn(50) + 50)
-			g.Strength = uint8(rnd.Intn(18))
-			g.Intelligence = uint8(rnd.Intn(18))
-			g.Charisma = uint8(rnd.Intn(18))
-			g.Wisdom = uint8(rnd.Intn(18))
-			g.Dexterity = uint8(rnd.Intn(18))
-			g.Constitution = uint8(rnd.Intn(18))
-			g.Hunger = g.HungerMax
-			g.Thirst = g.ThirstMax
-			g.Health = g.HealthMax
-			g.Sex = uint8(rnd.Int() % 2)
-			g.Pregnant = -1
-			s := InsertIntoTable("savage", g)
-			statement, err := database.Prepare(s)
-			_ = CheckErr(err, true)
-			_, err = statement.Exec()
-			_ = CheckErr(err, true)
-		}
-		o = "COMMIT;\n"
-		beginstatement, err = database.Prepare(o)
-		_ = CheckErr(err, true)
-		_, err = beginstatement.Exec()
-		_ = CheckErr(err, true)
-
+		addStartingSavages()
 		fmt.Println("Generated a new generation 0.")
 		os.Exit(0)
 	}
@@ -101,6 +48,20 @@ func main() {
 	dbx, err = sqlx.Connect("sqlite", "db/savages.db")
 	_ = CheckErr(err, true)
 	defer dbx.Close()
+
+	tmpString := fmt.Sprintf("SELECT day FROM %s WHERE ID='0';", GAMEDBTABLE)
+	//dayNumSQL := "SELECT day FROM gamedb WHERE ID='0';"
+	var dayNum int
+	err = dbx.Get(&dayNum, tmpString)
+	CheckErr(err, true)
+	dayNum++
+	fmt.Println("Day:", dayNum)
+
+	tmpString = fmt.Sprintf("UPDATE %s SET day = day + 1 WHERE ID='0';", GAMEDBTABLE)
+	//s := "UPDATE gamedb SET day = day + 1 WHERE ID='0';"
+	tx := dbx.MustBegin()
+	tx.MustExec(tmpString)
+	tx.Commit()
 
 	/*
 		database, err = sql.Open("sqlite", "db/savages.db")
@@ -113,6 +74,7 @@ func main() {
 }
 
 func RunDay() {
+	var count int // count of alive savages
 	fmt.Println("Running a day.")
 	/*
 		database, err := sql.Open("sqlite", "db/savages.db")
@@ -123,99 +85,66 @@ func RunDay() {
 		defer database.Close()
 	*/
 
-	/*
-		s := "UPDATE gamedb SET day = day + 1 WHERE ID='0';"
-		statement, err := database.Prepare(s)
-		_ = CheckErr(err, true)
-		_, err = statement.Exec()
-		_ = CheckErr(err, true)
+	// Increment the day.
+	tmpString := fmt.Sprintf("UPDATE %s SET day = day + 1 WHERE ID='0';", GAMEDBTABLE)
+	//s := "UPDATE gamedb SET day = day + 1 WHERE ID='0';"
+	tx := dbx.MustBegin()
+	tx.MustExec(tmpString)
+	tx.Commit()
 
-		countSQL := "SELECT COUNT(*) FROM savage WHERE health > 0;"
-		statement, err = database.Prepare(countSQL)
-		_ = CheckErr(err, true)
-		rows, err := statement.Query()
-		_ = CheckErr(err, true)
-		var c int // count of alive savages
-		for rows.Next() {
-			rows.Scan(&c)
-		}
-		rows.Close()
-	*/
-
-	// Load the savages into memory.
-	//savages := make([]savage, c)
-	//	savagesSQL := "SELECT * FROM savage WHERE health > 0;"
-	//	statement, err = database.Prepare(savagesSQL)
-	//	_ = CheckErr(err, true)
-
-	ss := savage{}
-	rows1, err := dbx.Queryx("SELECT * FROM savage WHERE health > 0;")
-	//rows, err = statement.Query()
+	tmpString = fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE health > 0;", SAVAGETABLE)
+	err := dbx.Get(&count, tmpString)
 	_ = CheckErr(err, true)
-	for i := 0; rows1.Next(); i++ {
-		//var ss savage
-		//rows.Scan(&ss)
 
-		//ss := savage{}
+	fmt.Println("There are", count, "savages alive.")
+
+	s := fmt.Sprintf("SELECT * FROM %s WHERE health > 0;", SAVAGETABLE)
+	rows1, err := dbx.Queryx(s)
+	_ = CheckErr(err, true)
+	for rows1.Next() {
+		var ss Sav
 		err := rows1.StructScan(&ss)
 		_ = CheckErr(err, true)
-
-		/*
-			rows.Scan(
-				&ss.ID,
-				&ss.OwnerID,
-				&ss.Updated,
-				&ss.Location,
-				&ss.FirstName,
-				&ss.LastName,
-				&ss.Age,
-				&ss.Sex,
-				&ss.Pregnant,
-				&ss.MotherID,
-				&ss.FatherID,
-				&ss.Hunger,
-				&ss.HungerMax,
-				&ss.Thirst,
-				&ss.ThirstMax,
-				&ss.Health,
-				&ss.HealthMax,
-				&ss.Strength,
-				&ss.Intelligence,
-				&ss.Charisma,
-				&ss.Wisdom,
-				&ss.Dexterity,
-				&ss.Constitution,
-			)
-		*/
-		//fmt.Print("ss: ", ss)
-		savages = append(savages, ss)
+		fmt.Println(ss)
+		savs = append(savs, ss)
 	}
-	rows1.Close()
 
-	c := len(savages)
+	//dbx.Select(&savs, s)
+	fmt.Println("dbloaded", len(savs))
 	/*
-		for i := 0; i < c; i++ {
-			savages[i].Updated = true
-			savages[i].Age++
+		rows, err := dbx.Queryx(s)
+		_ = CheckErr(err, true)
+		for rows.Next() {
+			err := rows.StructScan(&ss)
+			_ = CheckErr(err, true)
+			savs = append(savs, ss)
 		}
 	*/
+	fmt.Println("Completed")
+	for _, j := range savs {
+		fmt.Println(j)
+	}
+	//err = dbx.Select(&savages, "SELECT * FROM savage WHERE health > 0;")
+	//CheckErr(err, true)
 
 	// Load the distances into memory.
 	var distances []distance
 
-	distances = make([]distance, c*c)
+	//distances = make([]distance, count*count)
 
-	for i := 0; i < c-1; i++ {
-		for j := i + 1; j < c; j++ {
+	for i := 0; i < count-1; i++ {
+		for j := i + 1; j < count; j++ {
 			d := distance{}
-			d.ID1 = savages[i].ID
-			d.ID2 = savages[j].ID
-			d.Distance = DistanceSavage(savages[i], savages[j])
+			d.ID1 = savs[i].ID
+			d.ID2 = savs[j].ID
+			d.Distance = DistanceSavage(savs[i], savs[j])
 			if d.Distance <= 10 {
 				distances = append(distances, d)
 			}
 		}
 	}
+
+	fmt.Println("There are", len(distances), "distances.")
 
 	/*
 		for _, s := range savages {
@@ -276,7 +205,7 @@ func RunDay() {
 func getNextSavageID() int {
 	var lastID int
 
-	sql1 := "SELECT MAX(ID) FROM savage;"
+	sql1 := fmt.Sprintf("SELECT MAX(ID) FROM savage;", SAVAGETABLE)
 	statement, err := database.Prepare(sql1)
 	_ = CheckErr(err, true)
 	rows, err := statement.Query()

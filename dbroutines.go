@@ -13,23 +13,33 @@ import (
 // Create a new DB. Remove the old one if it exists.
 func CreateDB() {
 
-	DropTable("savage")
-	DropTable("gamedb")
-	DropTable("birthrecords")
-	DropTable("logging")
-	DropTable("users")
+	DropTable(SAVAGETABLE)
+	DropTable(GAMEDBTABLE)
+	DropTable(BIRTHRECORDTABLE)
+	DropTable(LOGGINGTABLE)
+	DropTable(USERSTABLE)
 
 	tx := dbx.MustBegin()
-	s := CreateTableFromStruct("savage", savage{})
+	s := CreateTableFromStruct(SAVAGETABLE, Sav{})
+	s = strings.ToLower(s)
 	tx.MustExec(s)
-	s = CreateTableFromStruct("gamedb", gamedb{})
+
+	s = CreateTableFromStruct(GAMEDBTABLE, gamedb{})
+	s = strings.ToLower(s)
 	tx.MustExec(s)
-	s = CreateTableFromStruct("birthrecords", birthrecord{})
+
+	s = CreateTableFromStruct(BIRTHRECORDTABLE, birthrecord{})
+	s = strings.ToLower(s)
 	tx.MustExec(s)
-	s = CreateTableFromStruct("logging", log{})
+
+	s = CreateTableFromStruct(LOGGINGTABLE, log{})
+	s = strings.ToLower(s)
 	tx.MustExec(s)
-	s = CreateTableFromStruct("users", user{})
+
+	s = CreateTableFromStruct(USERSTABLE, user{})
+	s = strings.ToLower(s)
 	tx.MustExec(s)
+
 	tx.Commit()
 
 	initGame()
@@ -66,7 +76,7 @@ func addInitialUser() {
 	admin = strings.TrimRight(admin, "\n")
 	pwd = strings.TrimRight(pwd, "\n")
 
-	s := InsertIntoTable("users", u)
+	s := InsertIntoTable(USERSTABLE, u)
 
 	tx := dbx.MustBegin()
 	tx.MustExec(s)
@@ -79,7 +89,7 @@ func setGameDB() {
 	g := gamedb{}
 	g.ID = 0
 	g.Day = 0
-	s := InsertIntoTable("gamedb", g)
+	s := InsertIntoTable(GAMEDBTABLE, g)
 	tx := dbx.MustBegin()
 	tx.MustExec(s)
 	tx.Commit()
@@ -90,4 +100,40 @@ func initGame() {
 	setGameDB()
 
 	addInitialUser()
+}
+
+// Add the starting savages.
+func addStartingSavages() {
+	tx := dbx.MustBegin()
+	var s string
+
+	for i := 0; i < gen0Count; i++ {
+		g := Sav{}
+		g.ID = i
+		g.OwnerID = 0
+		g.Updated = false
+		g.FirstName = "Gen"
+		g.LastName = "Zero"
+		g.Location = XY2Index(rnd.Intn(maxX), rnd.Intn(maxY))
+		g.Age = 0
+		g.FatherID = 0
+		g.MotherID = 0
+		g.HungerMax = uint8(rnd.Intn(50) + 50)
+		g.ThirstMax = uint8(rnd.Intn(50) + 50)
+		g.HealthMax = uint8(rnd.Intn(50) + 50)
+		g.Strength = uint8(rnd.Intn(18))
+		g.Intelligence = uint8(rnd.Intn(18))
+		g.Charisma = uint8(rnd.Intn(18))
+		g.Wisdom = uint8(rnd.Intn(18))
+		g.Dexterity = uint8(rnd.Intn(18))
+		g.Constitution = uint8(rnd.Intn(18))
+		g.Hunger = g.HungerMax
+		g.Thirst = g.ThirstMax
+		g.Health = g.HealthMax
+		g.Sex = uint8(rnd.Int() % 2)
+		g.Pregnant = -1
+		s = InsertIntoTable(SAVAGETABLE, g)
+		tx.MustExec(s)
+	}
+	tx.Commit()
 }

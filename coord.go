@@ -25,6 +25,6 @@ func DistanceIndex(i1, i2 int) int {
 }
 
 // Returns the distance between two savages.
-func DistanceSavage(s1, s2 savage) int {
+func DistanceSavage(s1, s2 Sav) int {
 	return DistanceIndex(s1.Location, s2.Location)
 }

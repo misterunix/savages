@@ -2,24 +2,24 @@ package main
 
 func breed(id1, id2 int) {
 
-	newSavage := savage{}
+	newSavage := Sav{}
 
 	newSavage.ID = getNextSavageID()
 
-	if savages[id1].Sex == 1 {
-		savages[id1].Pregnant = 10
-		savages[id1].Updated = true
+	if savs[id1].Sex == 1 {
+		savs[id1].Pregnant = 10
+		savs[id1].Updated = true
 	} else {
-		savages[id2].Pregnant = 10
-		savages[id2].Updated = true
+		savs[id2].Pregnant = 10
+		savs[id2].Updated = true
 	}
 
 	newSavage.Updated = false
 
 	if rnd.Intn(100) <= 50 {
-		newSavage.Location = savages[id1].Location
+		newSavage.Location = savs[id1].Location
 	} else {
-		newSavage.Location = savages[id2].Location
+		newSavage.Location = savs[id2].Location
 	}
 
 	newSavage.FirstName = "Gen"
@@ -33,35 +33,35 @@ func breed(id1, id2 int) {
 	}
 
 	if rnd.Intn(100) <= 50 {
-		newSavage.OwnerID = savages[id1].OwnerID
+		newSavage.OwnerID = savs[id1].OwnerID
 	} else {
-		newSavage.OwnerID = savages[id2].OwnerID
+		newSavage.OwnerID = savs[id2].OwnerID
 	}
 
 	if rnd.Intn(100) <= 50 {
-		newSavage.MotherID = savages[id1].ID
-		newSavage.FatherID = savages[id2].ID
+		newSavage.MotherID = savs[id1].ID
+		newSavage.FatherID = savs[id2].ID
 	} else {
-		newSavage.MotherID = savages[id2].ID
-		newSavage.FatherID = savages[id1].ID
+		newSavage.MotherID = savs[id2].ID
+		newSavage.FatherID = savs[id1].ID
 	}
 
 	if rnd.Intn(100) <= 50 {
-		newSavage.HungerMax = savages[id1].HungerMax
+		newSavage.HungerMax = savs[id1].HungerMax
 	} else {
-		newSavage.HungerMax = savages[id2].HungerMax
+		newSavage.HungerMax = savs[id2].HungerMax
 	}
 
 	if rnd.Intn(100) <= 50 {
-		newSavage.ThirstMax = savages[id1].ThirstMax
+		newSavage.ThirstMax = savs[id1].ThirstMax
 	} else {
-		newSavage.ThirstMax = savages[id2].ThirstMax
+		newSavage.ThirstMax = savs[id2].ThirstMax
 	}
 
 	if rnd.Intn(100) <= 50 {
-		newSavage.HealthMax = savages[id1].HealthMax
+		newSavage.HealthMax = savs[id1].HealthMax
 	} else {
-		newSavage.HealthMax = savages[id2].HealthMax
+		newSavage.HealthMax = savs[id2].HealthMax
 	}
 
 	newSavage.Hunger = newSavage.HungerMax
@@ -69,42 +69,42 @@ func breed(id1, id2 int) {
 	newSavage.Health = newSavage.HealthMax
 
 	if rnd.Intn(100) <= 50 {
-		newSavage.Strength = savages[id1].Strength
+		newSavage.Strength = savs[id1].Strength
 	} else {
-		newSavage.Strength = savages[id2].Strength
+		newSavage.Strength = savs[id2].Strength
 	}
 
 	if rnd.Intn(100) <= 50 {
-		newSavage.Intelligence = savages[id1].Intelligence
+		newSavage.Intelligence = savs[id1].Intelligence
 	} else {
-		newSavage.Intelligence = savages[id2].Intelligence
+		newSavage.Intelligence = savs[id2].Intelligence
 	}
 
 	if rnd.Intn(100) <= 50 {
-		newSavage.Charisma = savages[id1].Charisma
+		newSavage.Charisma = savs[id1].Charisma
 	} else {
-		newSavage.Charisma = savages[id2].Charisma
+		newSavage.Charisma = savs[id2].Charisma
 	}
 
 	if rnd.Intn(100) <= 50 {
-		newSavage.Wisdom = savages[id1].Wisdom
+		newSavage.Wisdom = savs[id1].Wisdom
 	} else {
-		newSavage.Wisdom = savages[id2].Wisdom
+		newSavage.Wisdom = savs[id2].Wisdom
 	}
 
 	if rnd.Intn(100) <= 50 {
-		newSavage.Dexterity = savages[id1].Dexterity
+		newSavage.Dexterity = savs[id1].Dexterity
 	} else {
-		newSavage.Dexterity = savages[id2].Dexterity
+		newSavage.Dexterity = savs[id2].Dexterity
 	}
 
 	if rnd.Intn(100) <= 50 {
-		newSavage.Constitution = savages[id1].Constitution
+		newSavage.Constitution = savs[id1].Constitution
 	} else {
-		newSavage.Constitution = savages[id2].Constitution
+		newSavage.Constitution = savs[id2].Constitution
 	}
 
-	s := InsertIntoTable("savage", newSavage)
+	s := InsertIntoTable(SAVAGETABLE, newSavage)
 	statement, err := database.Prepare(s)
 	_ = CheckErr(err, true)
 	_, err = statement.Exec()

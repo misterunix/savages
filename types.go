@@ -1,6 +1,6 @@
 package main
 
-type savage struct {
+type Sav struct {
 	ID           int    // The id of the savage and also the primary key.
 	OwnerID      int    // The id of the owner of the savage.
 	Updated      bool   // If the savage needs to be updated.

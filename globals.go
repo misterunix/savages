@@ -20,4 +20,12 @@ var database *sql.DB
 var dbx *sqlx.DB
 
 var rnd *rand.Rand
-var savages []savage
+var savs []Sav
+
+const (
+	SAVAGETABLE      = "sav"
+	GAMEDBTABLE      = "gamedb"
+	BIRTHRECORDTABLE = "birthrecords"
+	LOGGINGTABLE     = "logging"
+	USERSTABLE       = "users"
+)
