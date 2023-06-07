@@ -205,7 +205,7 @@ func RunDay() {
 func getNextSavageID() int {
 	var lastID int
 
-	sql1 := fmt.Sprintf("SELECT MAX(ID) FROM savage;", SAVAGETABLE)
+	sql1 := fmt.Sprintf("SELECT MAX(ID) FROM %s;", SAVAGETABLE)
 	statement, err := database.Prepare(sql1)
 	_ = CheckErr(err, true)
 	rows, err := statement.Query()
