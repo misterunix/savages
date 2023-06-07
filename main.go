@@ -57,12 +57,13 @@ func main() {
 	dayNum++
 	fmt.Println("Day:", dayNum)
 
-	tmpString = fmt.Sprintf("UPDATE %s SET day = day + 1 WHERE ID='0';", GAMEDBTABLE)
-	//s := "UPDATE gamedb SET day = day + 1 WHERE ID='0';"
-	tx := dbx.MustBegin()
-	tx.MustExec(tmpString)
-	tx.Commit()
-
+	/*
+		tmpString = fmt.Sprintf("UPDATE %s SET day = day + 1 WHERE ID='0';", GAMEDBTABLE)
+		//s := "UPDATE gamedb SET day = day + 1 WHERE ID='0';"
+		tx := dbx.MustBegin()
+		tx.MustExec(tmpString)
+		tx.Commit()
+	*/
 	/*
 		database, err = sql.Open("sqlite", "db/savages.db")
 		_ = CheckErr(err, true)
@@ -76,14 +77,6 @@ func main() {
 func RunDay() {
 	var count int // count of alive savages
 	fmt.Println("Running a day.")
-	/*
-		database, err := sql.Open("sqlite", "db/savages.db")
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		defer database.Close()
-	*/
 
 	// Increment the day.
 	tmpString := fmt.Sprintf("UPDATE %s SET day = day + 1 WHERE ID='0';", GAMEDBTABLE)
@@ -205,7 +198,7 @@ func RunDay() {
 func getNextSavageID() int {
 	var lastID int
 
-	sql1 := fmt.Sprintf("SELECT MAX(ID) FROM savage;", SAVAGETABLE)
+	sql1 := fmt.Sprintf("SELECT MAX(ID) FROM %s;", SAVAGETABLE)
 	statement, err := database.Prepare(sql1)
 	_ = CheckErr(err, true)
 	rows, err := statement.Query()

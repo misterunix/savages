@@ -33,9 +33,11 @@ func SetPregnant(id1, id2 int) {
 	if savs[id1].Sex == 1 {
 		savs[id1].Pregnant = 10
 		savs[id1].Updated = true
+		savs[id1].Points += 2
 	} else {
 		savs[id2].Pregnant = 10
 		savs[id2].Updated = true
+		savs[id2].Points++
 	}
 }
 

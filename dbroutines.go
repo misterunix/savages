@@ -111,6 +111,7 @@ func addStartingSavages() {
 		g := Sav{}
 		g.ID = i
 		g.OwnerID = 0
+		g.Points = 0
 		g.Updated = false
 		g.FirstName = "Gen"
 		g.LastName = "Zero"
