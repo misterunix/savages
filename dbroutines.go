@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"math/rand/v2"
 	"os"
 	"strings"
 
@@ -179,7 +180,9 @@ func addStartingSavages() error {
 	var lastnames []string
 	scanner := bufio.NewScanner(lnf)
 	for scanner.Scan() {
-		lastnames = append(lastnames, scanner.Text())
+		tmps := scanner.Text()
+		tmps = strings.ToUpper(tmps[:1]) + tmps[1:]
+		lastnames = append(lastnames, tmps)
 	}
 	err = lnf.Close()
 	if err != nil {
@@ -224,7 +227,9 @@ func addStartingSavages() error {
 	bnc := len(boynames)
 
 	var s string
+	var sqlog string
 	s = "BEGIN;\n"
+	sqlog = "BEGIN;\n"
 
 	for i := 0; i < gen0Count; i++ {
 		g := Sav{}
@@ -235,34 +240,42 @@ func addStartingSavages() error {
 		//g.FirstName = "Gen"
 		//g.LastName = "Zero"
 		g.Generation = 0
-		g.Location = XY2Index(rnd.Intn(maxX), rnd.Intn(maxY))
+		g.Location = XY2Index(rand.IntN(maxX), rand.IntN(maxY))
 		g.Age = 0
 		g.FatherID = 0
 		g.MotherID = 0
-		g.HungerMax = uint8(rnd.Intn(50) + 50)
-		g.ThirstMax = uint8(rnd.Intn(50) + 50)
-		g.HealthMax = uint8(rnd.Intn(50) + 50)
-		g.Strength = uint8(rnd.Intn(17)) + 1
-		g.Intelligence = uint8(rnd.Intn(17)) + 1
-		g.Charisma = uint8(rnd.Intn(17)) + 1
-		g.Wisdom = uint8(rnd.Intn(17)) + 1
-		g.Dexterity = uint8(rnd.Intn(17)) + 1
-		g.Constitution = uint8(rnd.Intn(17)) + 1
+		g.HungerMax = uint8(rand.IntN(50) + 50)
+		g.ThirstMax = uint8(rand.IntN(50) + 50)
+		g.HealthMax = uint8(rand.IntN(50) + 50)
+		g.Strength = uint8(rand.IntN(17)) + 1
+		g.Intelligence = uint8(rand.IntN(17)) + 1
+		g.Charisma = uint8(rand.IntN(17)) + 1
+		g.Wisdom = uint8(rand.IntN(17)) + 1
+		g.Dexterity = uint8(rand.IntN(17)) + 1
+		g.Constitution = uint8(rand.IntN(17)) + 1
 		g.Hunger = g.HungerMax
 		g.Thirst = g.ThirstMax
 		g.Health = g.HealthMax
-		g.Sex = uint8(rnd.Int() % 2)
-		g.LastName = lastnames[rnd.Intn(lnc)]
+		g.Sex = uint8(rand.Int() % 2)
+		g.LastName = lastnames[rand.IntN(lnc)]
 		if g.Sex == 0 {
-			g.FirstName = boynames[rnd.Intn(bnc)]
+			g.FirstName = boynames[rand.IntN(bnc)]
 		} else {
-			g.FirstName = girlnames[rnd.Intn(gnc)]
+			g.FirstName = girlnames[rand.IntN(gnc)]
 		}
 		g.Pregnant = -1
 		s += InsertIntoTable(SAVAGETABLE, g)
 
+		tl := tlog{}
+		tl.Date = 0
+		tl.Who = 0
+		tl.Message = fmt.Sprintf("Added %s %s to the game.", g.FirstName, g.LastName)
+		sqlog += InsertIntoTable(LOGGINGTABLE, tl)
+
 	}
 	s += "COMMIT;\n"
+	sqlog += "COMMIT;\n"
+
 	statement, err := database.Prepare(s)
 	if err != nil {
 		log.Println(err)
@@ -273,5 +286,17 @@ func addStartingSavages() error {
 		log.Println(err)
 		return err
 	}
+
+	statement, err = database.Prepare(sqlog)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	_, err = statement.Exec()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
 	return nil
 }

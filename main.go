@@ -4,9 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"math/rand"
+
 	"os"
-	"time"
 
 	_ "github.com/glebarez/go-sqlite"
 )
@@ -15,8 +14,11 @@ func main() {
 	fmt.Println("Starting Savages.")
 	fmt.Println("Version:", VERSION)
 
-	rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
+	log.SetOutput(os.Stdout)
+	log.SetFlags(log.Llongfile)
 
+	//rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
+	//r := rand.IntN(100)
 	//var err error
 
 	createnewdb := false
@@ -109,7 +111,7 @@ func RunDay() error {
 
 	for rows.Next() {
 		var ss Sav
-		err := rows.Scan(&ss)
+		err := rows.Scan(ss)
 		if err != nil {
 			log.Println(err)
 			return err
