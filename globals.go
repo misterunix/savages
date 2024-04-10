@@ -2,7 +2,7 @@ package main
 
 import (
 	"database/sql"
-	"math/rand"
+
 	"os"
 )
 
@@ -16,7 +16,7 @@ const (
 const gen0Count = 200
 
 var database *sql.DB
-var rnd *rand.Rand
+
 var savs []Sav
 var lastnames []string
 var girlnames []string
@@ -29,4 +29,5 @@ const (
 	BIRTHRECORDTABLE = "birthrecords"
 	LOGGINGTABLE     = "logging"
 	USERSTABLE       = "users"
+	SAVTOSAV         = "savtosav"
 )

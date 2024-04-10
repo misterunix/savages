@@ -44,6 +44,10 @@ func main() {
 		fmt.Println("Created a new database.")
 	}
 
+	loadBoyNames()
+	loadGirlNames()
+	loadLastNames()
+
 	if generation0 {
 		fmt.Println("Generating a new generation 0.")
 		addStartingSavages()
@@ -51,20 +55,16 @@ func main() {
 		os.Exit(0)
 	}
 
-	loadBoyNames()
-	loadGirlNames()
-	loadLastNames()
-
 	for i := 0; i < 10; i++ {
 
 		tmpString := fmt.Sprintf("SELECT day FROM %s WHERE ID='0';", GAMEDBTABLE)
 		//dayNumSQL := "SELECT day FROM gamedb WHERE ID='0';"
 		var dayNum int
 		database.QueryRow(tmpString).Scan(&dayNum)
-		fmt.Println("Day:", dayNum)
+		//fmt.Println("Day:", dayNum)
 
 		dayNum++
-		fmt.Println("Day:", dayNum)
+		//fmt.Println("Day:", dayNum)
 
 		/*
 			tmpString = fmt.Sprintf("UPDATE %s SET day = day + 1 WHERE ID='0';", GAMEDBTABLE)
@@ -172,9 +172,8 @@ func RunDay() error {
 	// 	fmt.Println(i, j)
 	// }
 
-	fmt.Println("dbloaded", len(savs))
+	//fmt.Println("dbloaded", len(savs))
 
-	fmt.Println("Completed")
 	// for _, j := range savs {
 	// 	fmt.Println(j)
 	// }
@@ -187,13 +186,13 @@ func RunDay() error {
 			d.ID1 = savs[i].ID
 			d.ID2 = savs[j].ID
 			d.Distance = DistanceSavage(savs[i], savs[j])
-			if d.Distance <= 10 {
+			if d.Distance <= 5 {
 				distances = append(distances, d)
 			}
 		}
 	}
 
-	fmt.Println("There are", len(distances), "distances.")
+	fmt.Println("There are", len(distances), "distances below 5km.")
 
 	/*
 		for _, s := range savages {
@@ -248,7 +247,7 @@ func RunDay() error {
 			}
 		}
 	*/
-
+	fmt.Println("Day completed")
 	return nil
 }
 

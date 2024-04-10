@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"math/rand/v2"
+	"math/rand"
 	"os"
 	"strings"
 
@@ -34,6 +34,7 @@ func CreateDB() error {
 	DropTable(BIRTHRECORDTABLE)
 	DropTable(LOGGINGTABLE)
 	DropTable(USERSTABLE)
+	DropTable(SAVTOSAV)
 
 	var s string
 	s = "BEGIN;\n"
@@ -61,6 +62,9 @@ func CreateDB() error {
 	s += "\n"
 	//s = strings.ToLower(s)
 	//tx.MustExec(s)
+
+	s += CreateTableFromStruct(SAVTOSAV, savtosav{})
+	s += "\n"
 
 	s += "COMMIT;\n"
 	fmt.Println(s)
@@ -188,7 +192,7 @@ func loadLastNames() {
 		log.Println(err)
 		return
 	}
-
+	fmt.Println("Last:", len(lastnames))
 }
 
 func loadGirlNames() {
@@ -207,6 +211,7 @@ func loadGirlNames() {
 		log.Println(err)
 		return
 	}
+	fmt.Println("Girl:", len(girlnames))
 }
 
 func loadBoyNames() {
@@ -225,6 +230,7 @@ func loadBoyNames() {
 		log.Println(err)
 		return
 	}
+	fmt.Println("Boy:", len(boynames))
 }
 
 // Add the starting savages.
@@ -251,6 +257,8 @@ func addStartingSavages() error {
 	bnc := len(boynames)
 	lnc := len(lastnames)
 
+	//fmt.Println(gnc, bnc, lnc)
+
 	var s string
 	var sqlog string
 	s = "BEGIN;\n"
@@ -265,28 +273,30 @@ func addStartingSavages() error {
 		//g.FirstName = "Gen"
 		//g.LastName = "Zero"
 		g.Generation = 0
-		g.Location = XY2Index(rand.IntN(maxX), rand.IntN(maxY))
+		g.Location = XY2Index(rand.Intn(maxX), rand.Intn(maxY))
 		g.Age = 0
 		g.FatherID = 0
 		g.MotherID = 0
-		g.HungerMax = uint8(rand.IntN(50) + 50)
-		g.ThirstMax = uint8(rand.IntN(50) + 50)
-		g.HealthMax = uint8(rand.IntN(50) + 50)
-		g.Strength = uint8(rand.IntN(17)) + 1
-		g.Intelligence = uint8(rand.IntN(17)) + 1
-		g.Charisma = uint8(rand.IntN(17)) + 1
-		g.Wisdom = uint8(rand.IntN(17)) + 1
-		g.Dexterity = uint8(rand.IntN(17)) + 1
-		g.Constitution = uint8(rand.IntN(17)) + 1
+		g.HungerMax = uint8(rand.Intn(50) + 50)
+		g.ThirstMax = uint8(rand.Intn(50) + 50)
+		g.HealthMax = uint8(rand.Intn(50) + 50)
+		g.Strength = uint8(rand.Intn(17)) + 1
+		g.Intelligence = uint8(rand.Intn(17)) + 1
+		g.Charisma = uint8(rand.Intn(17)) + 1
+		g.Wisdom = uint8(rand.Intn(17)) + 1
+		g.Dexterity = uint8(rand.Intn(17)) + 1
+		g.Constitution = uint8(rand.Intn(17)) + 1
 		g.Hunger = g.HungerMax
 		g.Thirst = g.ThirstMax
 		g.Health = g.HealthMax
 		g.Sex = uint8(rand.Int() % 2)
-		g.LastName = lastnames[rand.IntN(lnc)]
+
+		g.LastName = lastnames[rand.Intn(lnc)]
+
 		if g.Sex == 0 {
-			g.FirstName = boynames[rand.IntN(bnc)]
+			g.FirstName = boynames[rand.Intn(bnc)]
 		} else {
-			g.FirstName = girlnames[rand.IntN(gnc)]
+			g.FirstName = girlnames[rand.Intn(gnc)]
 		}
 		g.Pregnant = -1
 		s += InsertIntoTable(SAVAGETABLE, g)
