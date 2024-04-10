@@ -1,12 +1,14 @@
 package main
 
-type savage struct {
+type Sav struct {
 	ID           int    // The id of the savage and also the primary key.
 	OwnerID      int    // The id of the owner of the savage.
+	Points       int    // The points of the savage.
 	Updated      bool   // If the savage needs to be updated.
 	Location     int    // The location of the savage. Y * maxX + X
 	FirstName    string // The first name of the savage.
 	LastName     string // The last name of the savage.
+	Generation   int    // The generation of the savage.
 	Age          int    // The age of the savage.
 	Sex          uint8  // 0 male / 1 female
 	Pregnant     int8   // days till birth count down. -1 not pregnant.
@@ -24,6 +26,9 @@ type savage struct {
 	Wisdom       uint8  // The wisdom of the savage.
 	Dexterity    uint8  // The dexterity of the savage.
 	Constitution uint8  // The constitution of the savage.
+	Attribute1   uint8  // How horny.
+	Attribute2   uint8  // How mean.
+	Attribute3   uint8  // The attributes of the savage.
 }
 
 type distance struct {
@@ -39,7 +44,7 @@ type user struct {
 	Password string
 }
 
-type log struct {
+type tlog struct {
 	ID      int
 	Date    int
 	Who     int

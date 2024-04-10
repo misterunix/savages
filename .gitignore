@@ -24,3 +24,6 @@ bejayart
 *.xz
 
 bin/*
+!boys.txt
+!girls.txt
+!lastnames.txt

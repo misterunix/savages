@@ -16,4 +16,12 @@ const gen0Count = 100
 
 var database *sql.DB
 var rnd *rand.Rand
-var savages []savage
+var savs []Sav
+
+const (
+	SAVAGETABLE      = "sav"
+	GAMEDBTABLE      = "gamedb"
+	BIRTHRECORDTABLE = "birthrecords"
+	LOGGINGTABLE     = "logging"
+	USERSTABLE       = "users"
+)

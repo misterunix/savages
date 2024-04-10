@@ -1,314 +1,277 @@
 package main
 
 import (
+	"bufio"
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
+	"strings"
 
 	_ "github.com/glebarez/go-sqlite"
-	"github.com/misterunix/sniffle/hashing"
 
-	"reflect"
+	"github.com/misterunix/sniffle/hashing"
 )
 
-func UpdateRow(table string, v map[string]any, where string) string {
-
-	var sql1, sql2, sql3 string
-	sql1 = "UPDATE " + table + " SET "
-
-	for p, c := range v {
-		switch c.(type) {
-		case int:
-			sql2 += p + " = " + fmt.Sprintf("%d", c) + ","
-		case int8:
-			sql2 += p + " = " + fmt.Sprintf("%d", c) + ","
-		case int16:
-			sql2 += p + " = " + fmt.Sprintf("%d", c) + ","
-		case int32:
-			sql2 += p + " = " + fmt.Sprintf("%d", c) + ","
-		case int64:
-			sql2 += p + " = " + fmt.Sprintf("%d", c) + ","
-		case uint:
-			sql2 += p + " = " + fmt.Sprintf("%d", c) + ","
-		case uint8:
-			sql2 += p + " = " + fmt.Sprintf("%d", c) + ","
-		case uint16:
-			sql2 += p + " = " + fmt.Sprintf("%d", c) + ","
-		case uint32:
-			sql2 += p + " = " + fmt.Sprintf("%d", c) + ","
-		case uint64:
-			sql2 += p + " = " + fmt.Sprintf("%d", c) + ","
-		case string:
-			sql2 += p + " = " + "'" + fmt.Sprintf("%s", c) + "'" + ","
-		case float32:
-			sql2 += p + " = " + fmt.Sprintf("%f", c) + ","
-		case float64:
-			sql2 += p + " = " + fmt.Sprintf("%f", c) + ","
-		case bool:
-			sql2 += p + " = " + fmt.Sprintf("%v", c) + ","
-		default:
-			return ""
-		}
-
+// Open the database. If it doesn't exist, create it. Return an error if there is a problem.
+func OpenDB() error {
+	var err error
+	fn := "db/savages.db"
+	database, err = sql.Open("sqlite", fn)
+	if err != nil {
+		return err
 	}
-
-	sql3 = sql1 + sql2 + " WHERE " + where + ";"
-	return sql3
-
+	database.SetMaxOpenConns(1)
+	return nil
 }
 
-func RemoveRow(table string, where string) string {
+// Create a new DB. Remove the old one if it exists.
+func CreateDB() error {
 
-	var sql1, sql2 string
-	sql1 = "DELETE FROM " + table + " WHERE "
-	sql2 = sql1 + where + ";"
-	return sql2
+	DropTable(SAVAGETABLE)
+	DropTable(GAMEDBTABLE)
+	DropTable(BIRTHRECORDTABLE)
+	DropTable(LOGGINGTABLE)
+	DropTable(USERSTABLE)
 
-}
+	var s string
+	s = "BEGIN;\n"
+	s += CreateTableFromStruct(SAVAGETABLE, Sav{})
+	s += "\n"
+	//s = strings.ToLower(s)
+	//tx.MustExec(s)
 
-func InsertIntoTable(table string, s interface{}) string {
+	s += CreateTableFromStruct(GAMEDBTABLE, gamedb{})
+	s += "\n"
+	//s = strings.ToLower(s)
+	//tx.MustExec(s)
 
-	var middlesql1 string
-	var middlesql2 string
+	s += CreateTableFromStruct(BIRTHRECORDTABLE, birthrecord{})
+	s += "\n"
+	//s = strings.ToLower(s)
+	//tx.MustExec(s)
 
-	var reflectedValue reflect.Value = reflect.ValueOf(s)
+	s += CreateTableFromStruct(LOGGINGTABLE, tlog{})
+	s += "\n"
+	//s = strings.ToLower(s)
+	//tx.MustExec(s)
 
-	middlesql1 = "INSERT INTO " + table + " ("
-	middlesql2 = ")VALUES("
-	for i := 0; i < reflectedValue.NumField(); i++ {
+	s += CreateTableFromStruct(USERSTABLE, user{})
+	s += "\n"
+	//s = strings.ToLower(s)
+	//tx.MustExec(s)
 
-		varName := reflectedValue.Type().Field(i).Name
-		varType := reflectedValue.Type().Field(i).Type
-		varValue := reflectedValue.Field(i).Interface()
-
-		middlesql1 += varName + ","
-
-		// This is my normal way of working with reflect. Strings may be slower but easier to read.
-		switch varType.Kind() {
-		case reflect.Int:
-			middlesql2 += fmt.Sprintf("%d", varValue.(int)) + ","
-		case reflect.Int8:
-			middlesql2 += fmt.Sprintf("%d", varValue.(int8)) + ","
-		case reflect.Int16:
-			middlesql2 += fmt.Sprintf("%d", varValue.(int16)) + ","
-		case reflect.Int32:
-			middlesql2 += fmt.Sprintf("%d", varValue.(int32)) + ","
-		case reflect.Int64:
-			middlesql2 += fmt.Sprintf("%d", varValue.(int64)) + ","
-		case reflect.Uint:
-			middlesql2 += fmt.Sprintf("%d", varValue.(uint)) + ","
-		case reflect.Uint8:
-			middlesql2 += fmt.Sprintf("%d", varValue.(uint8)) + ","
-		case reflect.Uint16:
-			middlesql2 += fmt.Sprintf("%d", varValue.(uint16)) + ","
-		case reflect.Uint32:
-			middlesql2 += fmt.Sprintf("%d", varValue.(uint32)) + ","
-		case reflect.Uint64:
-			middlesql2 += fmt.Sprintf("%d", varValue.(uint64)) + ","
-		case reflect.String:
-			middlesql2 += "'" + varValue.(string) + "',"
-		case reflect.Float32:
-			middlesql2 += fmt.Sprintf("%f", varValue.(float64)) + ","
-		case reflect.Float64:
-			middlesql2 += fmt.Sprintf("%f", varValue.(float64)) + ","
-		case reflect.Bool:
-			middlesql2 += fmt.Sprintf("%v", varValue.(bool)) + ","
-		default:
-			return ""
-		}
-	}
-
-	middlesql1 = middlesql1[:len(middlesql1)-1]
-	middlesql2 = middlesql2[:len(middlesql2)-1] + ");"
-	yyy := middlesql1 + middlesql2
-	return yyy
-}
-
-// Create table based on struct.
-// Retuns the sql statement as a string.
-// This is a work in progress.
-func CreateTableFromStruct(table string, s interface{}) string {
-
-	var reflectedValue reflect.Value = reflect.ValueOf(s) // reflect the struct (interface)
-
-	var sqlstatement string
-
-	//os.Remove("db/savages.db")
-
-	sqlstatement1 := "CREATE TABLE " + table + " ("
-	for i := 0; i < reflectedValue.NumField(); i++ {
-		var vt string
-		varName := reflectedValue.Type().Field(i).Name // get the name of the field
-		sqlstatement += "," + varName + " "
-		varType := reflectedValue.Type().Field(i).Type // get the type of the field
-
-		// Did this differnt than the other reflect code. This is a work in progress.
-		switch varType.Kind() {
-		case reflect.Int:
-			if varName == "ID" { // detect if the field is the ID field
-				vt = "INTEGER NOT NULL PRIMARY KEY"
-			} else {
-				vt = "INTEGER"
-			}
-		case reflect.Int8:
-			vt = "INTEGER"
-		case reflect.Int16:
-			vt = "INTEGER"
-		case reflect.Int32:
-			vt = "INTEGER"
-		case reflect.Int64:
-			vt = "INTEGER"
-		case reflect.Uint:
-			vt = "INTEGER"
-		case reflect.Uint8:
-			vt = "INTEGER"
-		case reflect.Uint16:
-			vt = "INTEGER"
-		case reflect.Uint32:
-			vt = "INTEGER"
-		case reflect.Uint64:
-			vt = "INTEGER"
-		case reflect.String:
-			vt = "TEXT"
-		case reflect.Float64:
-			vt = "REAL"
-		case reflect.Float32:
-			vt = "REAL"
-		case reflect.Bool:
-			vt = "INTEGER"
-		}
-		sqlstatement += vt
-	}
-
-	// such a crappy way to do this. Return to this at a later date.
-	sqlstatement = sqlstatement[1:] // remove the first comma
-	sqlstatement += ");"
-	sqlstatement = sqlstatement1 + sqlstatement
-
-	return sqlstatement
-}
-
-// Remove any of the tables in the database.
-func DropTable(d *sql.DB, table string) {
-	//fmt.Println("Drop table:", table)
-	s := fmt.Sprintf("DROP TABLE IF EXISTS %s;", table)
+	s += "COMMIT;\n"
 	fmt.Println(s)
-	statement, _ := d.Prepare(s)
-	_, err := statement.Exec()
+	statement, err := database.Prepare(s)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Println(err, s)
+		return err
 	}
-}
 
-// Create a new DB
-func CreateDB(d *sql.DB) {
-	s := CreateTableFromStruct("savage", savage{})
-	fmt.Println(s)
-	statement, err := d.Prepare(s)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
 	_, err = statement.Exec()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Println(err)
+		return err
 	}
-	statement.Close()
 
-	s = CreateTableFromStruct("gamedb", gamedb{})
-	fmt.Println(s)
-	statement, err = d.Prepare(s)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	_, err = statement.Exec()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	statement.Close()
-
-	s = CreateTableFromStruct("birthrecords", birthrecord{})
-	fmt.Println(s)
-	statement, err = d.Prepare(s)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	_, err = statement.Exec()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	statement.Close()
-
-	s = CreateTableFromStruct("logging", log{})
-	fmt.Println(s)
-	statement, err = d.Prepare(s)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	_, err = statement.Exec()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	statement.Close()
-
-	s = CreateTableFromStruct("users", user{})
-	fmt.Println(s)
-	statement, err = d.Prepare(s)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	_, err = statement.Exec()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	statement.Close()
-
-	u := user{}
-	u.ID = 0
-	u.Username = "admin"
-	u.Email = "admin@localhost"
-	u.Password = hashing.StringHash(hashing.SHA256, "DefaultFuckingPassword")
-	s = InsertIntoTable("users", u)
-	fmt.Println(s)
-	statement, err = d.Prepare(s)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	_, err = statement.Exec()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	statement.Close()
-
-	g := gamedb{}
-	g.ID = 0
-	g.Day = 0
-	s = InsertIntoTable("gamedb", g)
-	fmt.Println(s)
-	statement, err = d.Prepare(s)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	_, err = statement.Exec()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	statement.Close()
+	initGame()
 
 	fmt.Println("Created a new database.")
 	os.Exit(0)
+	return nil
+}
+
+// Drop a table if it exists.
+func DropTable(table string) {
+	statement := fmt.Sprintf("DROP TABLE IF EXISTS %s;", table)
+	database.Exec(statement)
+}
+
+// add the admin user with password
+func addInitialUser() error {
+
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Admin username: ")
+	admin, err := reader.ReadString('\n')
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	fmt.Print("Admin password: ")
+	pwd, err := reader.ReadString('\n')
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	u := user{}
+	u.ID = 0
+	u.Username = admin
+	u.Email = "admin@localhost"
+	u.Password = hashing.StringHash(hashing.SHA256, pwd)
+
+	admin = strings.TrimRight(admin, "\n")
+	pwd = strings.TrimRight(pwd, "\n")
+
+	s1 := InsertIntoTable(USERSTABLE, u)
+	s := "BEGIN;\n" + s1 + "COMMIT;\n"
+	statement, err := database.Prepare(s)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	_, err = statement.Exec()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	fmt.Printf("user '%s' pwd '%s'\n", admin, pwd)
+	return nil
+}
+
+// setup the game day
+func setGameDB() error {
+	g := gamedb{}
+	g.ID = 0
+	g.Day = 0
+	s1 := InsertIntoTable(GAMEDBTABLE, g)
+	s0 := "BEGIN;\n" + s1 + "COMMIT;\n"
+	statemenr, err := database.Prepare(s0)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	_, err = statemenr.Exec()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+// Initialize the game.
+func initGame() {
+	err := setGameDB()
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+
+	err = addInitialUser()
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+}
+
+// Add the starting savages.
+func addStartingSavages() error {
+
+	lnf, err := os.OpenFile("lastnames.txt", os.O_RDONLY, 0666)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	var lastnames []string
+	scanner := bufio.NewScanner(lnf)
+	for scanner.Scan() {
+		lastnames = append(lastnames, scanner.Text())
+	}
+	err = lnf.Close()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	fnff, err := os.OpenFile("girls.txt", os.O_RDONLY, 0666)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	var girlnames []string
+	scanner = bufio.NewScanner(fnff)
+	for scanner.Scan() {
+		girlnames = append(girlnames, scanner.Text())
+	}
+	err = fnff.Close()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	var boynames []string
+	fnmf, err := os.OpenFile("boys.txt", os.O_RDONLY, 0666)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	scanner = bufio.NewScanner(fnmf)
+	for scanner.Scan() {
+		boynames = append(boynames, scanner.Text())
+	}
+	err = fnmf.Close()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	lnc := len(lastnames)
+	gnc := len(girlnames)
+	bnc := len(boynames)
+
+	var s string
+	s = "BEGIN;\n"
+
+	for i := 0; i < gen0Count; i++ {
+		g := Sav{}
+		g.ID = i
+		g.OwnerID = 0
+		g.Points = 0
+		g.Updated = false
+		//g.FirstName = "Gen"
+		//g.LastName = "Zero"
+		g.Generation = 0
+		g.Location = XY2Index(rnd.Intn(maxX), rnd.Intn(maxY))
+		g.Age = 0
+		g.FatherID = 0
+		g.MotherID = 0
+		g.HungerMax = uint8(rnd.Intn(50) + 50)
+		g.ThirstMax = uint8(rnd.Intn(50) + 50)
+		g.HealthMax = uint8(rnd.Intn(50) + 50)
+		g.Strength = uint8(rnd.Intn(17)) + 1
+		g.Intelligence = uint8(rnd.Intn(17)) + 1
+		g.Charisma = uint8(rnd.Intn(17)) + 1
+		g.Wisdom = uint8(rnd.Intn(17)) + 1
+		g.Dexterity = uint8(rnd.Intn(17)) + 1
+		g.Constitution = uint8(rnd.Intn(17)) + 1
+		g.Hunger = g.HungerMax
+		g.Thirst = g.ThirstMax
+		g.Health = g.HealthMax
+		g.Sex = uint8(rnd.Int() % 2)
+		g.LastName = lastnames[rnd.Intn(lnc)]
+		if g.Sex == 0 {
+			g.FirstName = boynames[rnd.Intn(bnc)]
+		} else {
+			g.FirstName = girlnames[rnd.Intn(gnc)]
+		}
+		g.Pregnant = -1
+		s += InsertIntoTable(SAVAGETABLE, g)
+
+	}
+	s += "COMMIT;\n"
+	statement, err := database.Prepare(s)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	_, err = statement.Exec()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
 }
