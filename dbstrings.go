@@ -92,7 +92,12 @@ func InsertIntoTable(table string, s interface{}) string {
 		// This is my normal way of working with reflect. Strings may be slower but easier to read.
 		switch varType.Kind() {
 		case reflect.Int:
-			middlesql2 += fmt.Sprintf("%d", varValue.(int)) + ","
+			if varName == "ID" {
+				middlesql2 += fmt.Sprintf("NULL") + ","
+			} else {
+				middlesql2 += fmt.Sprintf("%d", varValue.(int)) + ","
+			}
+			//middlesql2 += fmt.Sprintf("%d", varValue.(int)) + ","
 		case reflect.Int8:
 			middlesql2 += fmt.Sprintf("%d", varValue.(int8)) + ","
 		case reflect.Int16:

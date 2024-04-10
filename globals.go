@@ -13,7 +13,7 @@ const (
 	maxY = 100
 )
 
-const gen0Count = 100
+const gen0Count = 200
 
 var database *sql.DB
 var rnd *rand.Rand
