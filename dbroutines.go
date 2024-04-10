@@ -168,15 +168,14 @@ func initGame() {
 	}
 }
 
-// Add the starting savages.
-func addStartingSavages() error {
-
+// get a last name. since its called a lot, open the file once and read it into a slice.
+func loadLastNames() {
 	lnf, err := os.OpenFile("lastnames.txt", os.O_RDONLY, 0666)
 	if err != nil {
 		log.Println(err)
-		return err
+		return
 	}
-	var lastnames []string
+	// var lastnames []string
 	scanner := bufio.NewScanner(lnf)
 	for scanner.Scan() {
 		lastnames = append(lastnames, scanner.Text())
@@ -184,44 +183,70 @@ func addStartingSavages() error {
 	err = lnf.Close()
 	if err != nil {
 		log.Println(err)
-		return err
+		return
 	}
 
+}
+
+func loadGirlNames() {
 	fnff, err := os.OpenFile("girls.txt", os.O_RDONLY, 0666)
 	if err != nil {
 		log.Println(err)
-		return err
+		return
 	}
-	var girlnames []string
-	scanner = bufio.NewScanner(fnff)
+
+	scanner := bufio.NewScanner(fnff)
 	for scanner.Scan() {
 		girlnames = append(girlnames, scanner.Text())
 	}
 	err = fnff.Close()
 	if err != nil {
 		log.Println(err)
-		return err
+		return
 	}
+}
 
-	var boynames []string
+func loadBoyNames() {
+
 	fnmf, err := os.OpenFile("boys.txt", os.O_RDONLY, 0666)
 	if err != nil {
 		log.Println(err)
-		return err
+		return
 	}
-	scanner = bufio.NewScanner(fnmf)
+	scanner := bufio.NewScanner(fnmf)
 	for scanner.Scan() {
 		boynames = append(boynames, scanner.Text())
 	}
 	err = fnmf.Close()
 	if err != nil {
 		log.Println(err)
-		return err
+		return
 	}
+}
 
-	lnc := len(lastnames)
+// Add the starting savages.
+func addStartingSavages() error {
+
+	// lnf, err := os.OpenFile("lastnames.txt", os.O_RDONLY, 0666)
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return err
+	// }
+	// var lastnames []string
+	// scanner := bufio.NewScanner(lnf)
+	// for scanner.Scan() {
+	// 	lastnames = append(lastnames, scanner.Text())
+	// }
+	// err = lnf.Close()
+	// if err != nil {
+	// 	log.Println(err)
+	// 	return err
+	// }
+
+	//lnc := len(lastnames)
 	gnc := len(girlnames)
 	bnc := len(boynames)
+	lnc := len(lastnames)
 
 	var s string
 	s = "BEGIN;\n"

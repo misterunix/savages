@@ -1,5 +1,7 @@
 package main
 
+import "log"
+
 func mating(id1, id2 int) {
 
 	i1 := (savs[id1].Charisma +
@@ -55,20 +57,22 @@ func breed(id1, id2 int) {
 		newSavage.Location = savs[id2].Location
 	}
 
-	newSavage.FirstName = "Gen"
-	newSavage.LastName = "B"
 	newSavage.Age = 0
 
 	if rnd.Intn(100) <= 50 {
-		newSavage.Sex = 0
+		newSavage.Sex = 0 // boy
+		newSavage.FirstName = boynames[rnd.Intn(len(boynames))]
 	} else {
-		newSavage.Sex = 1
+		newSavage.Sex = 1 // girl
+		newSavage.FirstName = girlnames[rnd.Intn(len(girlnames))]
 	}
 
 	if rnd.Intn(100) <= 50 {
 		newSavage.OwnerID = savs[id1].OwnerID
+		newSavage.LastName = savs[id1].LastName
 	} else {
 		newSavage.OwnerID = savs[id2].OwnerID
+		newSavage.LastName = savs[id2].LastName
 	}
 
 	if rnd.Intn(100) <= 50 {
@@ -139,8 +143,15 @@ func breed(id1, id2 int) {
 
 	s := InsertIntoTable(SAVAGETABLE, newSavage)
 	statement, err := database.Prepare(s)
-	_ = CheckErr(err, true)
+	if err != nil {
+		log.Println(err)
+
+	}
+
 	_, err = statement.Exec()
-	_ = CheckErr(err, true)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 }

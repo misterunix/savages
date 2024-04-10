@@ -8,6 +8,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/blockloop/scan"
 	_ "github.com/glebarez/go-sqlite"
 )
 
@@ -32,7 +33,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	defer database.Close()
+	//defer database.Close()
 
 	if createnewdb {
 		fmt.Println("Creating a new database.")
@@ -47,30 +48,70 @@ func main() {
 		os.Exit(0)
 	}
 
-	tmpString := fmt.Sprintf("SELECT day FROM %s WHERE ID='0';", GAMEDBTABLE)
-	//dayNumSQL := "SELECT day FROM gamedb WHERE ID='0';"
-	var dayNum int
-	database.QueryRow(tmpString).Scan(&dayNum)
-	fmt.Println("Day:", dayNum)
+	loadBoyNames()
+	loadGirlNames()
+	loadLastNames()
 
-	dayNum++
-	fmt.Println("Day:", dayNum)
+	for i := 0; i < 10; i++ {
 
-	/*
-		tmpString = fmt.Sprintf("UPDATE %s SET day = day + 1 WHERE ID='0';", GAMEDBTABLE)
-		//s := "UPDATE gamedb SET day = day + 1 WHERE ID='0';"
-		tx := dbx.MustBegin()
-		tx.MustExec(tmpString)
-		tx.Commit()
-	*/
-	/*
-		database, err = sql.Open("sqlite", "db/savages.db")
-		_ = CheckErr(err, true)
-		defer database.Close()
-	*/
+		tmpString := fmt.Sprintf("SELECT day FROM %s WHERE ID='0';", GAMEDBTABLE)
+		//dayNumSQL := "SELECT day FROM gamedb WHERE ID='0';"
+		var dayNum int
+		database.QueryRow(tmpString).Scan(&dayNum)
+		fmt.Println("Day:", dayNum)
 
-	RunDay()
+		dayNum++
+		fmt.Println("Day:", dayNum)
 
+		/*
+			tmpString = fmt.Sprintf("UPDATE %s SET day = day + 1 WHERE ID='0';", GAMEDBTABLE)
+			//s := "UPDATE gamedb SET day = day + 1 WHERE ID='0';"
+			tx := dbx.MustBegin()
+			tx.MustExec(tmpString)
+			tx.Commit()
+		*/
+		/*
+			database, err = sql.Open("sqlite", "db/savages.db")
+			_ = CheckErr(err, true)
+			defer database.Close()
+		*/
+
+		savs = make([]Sav, 0)
+		err := RunDay()
+		if err != nil {
+			log.Println(err)
+			cleanExit(1)
+		}
+	}
+
+}
+
+func setupLog() error {
+	var err error
+	logfile, err = os.OpenFile("savages.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		return err
+	}
+	log.SetOutput(logfile)
+	log.SetFlags(log.Ldate | log.Ltime | log.Llongfile)
+	return nil
+}
+
+func cleanExit(exitcode int) {
+	log.Println("Exiting.")
+
+	err := database.Close()
+	if err != nil {
+		log.Println("Error closing database:", err)
+	}
+
+	err = logfile.Close()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error closing logfile:", err)
+		os.Exit(1)
+	}
+
+	os.Exit(exitcode)
 }
 
 func RunDay() error {
@@ -107,15 +148,26 @@ func RunDay() error {
 		return err
 	}
 
-	for rows.Next() {
-		var ss Sav
-		err := rows.Scan(&ss)
-		if err != nil {
-			log.Println(err)
-			return err
-		}
-		savs = append(savs, ss)
+	err = scan.Rows(&savs, rows)
+	if err != nil {
+		log.Println(err)
+		return err
 	}
+	// for rows.Next() {
+	// 	//var ss Sav
+	// 	//err := rows.Scan(&ss)
+	// 	err := scan.Rows(&savs, rows)
+	// 	if err != nil {
+	// 		log.Println(err)
+	// 		return err
+	// 	}
+	// 	//fmt.Println(cols)
+	// 	//savs = append(savs, ss)
+	// }
+
+	// for i, j := range savs {
+	// 	fmt.Println(i, j)
+	// }
 
 	fmt.Println("dbloaded", len(savs))
 
