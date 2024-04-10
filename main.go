@@ -3,12 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"time"
 
 	_ "github.com/glebarez/go-sqlite"
-	"github.com/jmoiron/sqlx"
 )
 
 func main() {
@@ -26,10 +26,13 @@ func main() {
 	flag.BoolVar(&generation0, "gen0", false, "Generate a new generation 0.")
 	flag.Parse()
 
-	var err error
-	dbx, err = sqlx.Connect("sqlite", "db/savages.db")
-	_ = CheckErr(err, true)
-	defer dbx.Close()
+	err := OpenDB() // Open the database
+	if err != nil {
+		log.Println(err)
+		os.Exit(1)
+	}
+
+	defer database.Close()
 
 	if createnewdb {
 		fmt.Println("Creating a new database.")
@@ -44,16 +47,12 @@ func main() {
 		os.Exit(0)
 	}
 
-	//var err error
-	dbx, err = sqlx.Connect("sqlite", "db/savages.db")
-	_ = CheckErr(err, true)
-	defer dbx.Close()
-
 	tmpString := fmt.Sprintf("SELECT day FROM %s WHERE ID='0';", GAMEDBTABLE)
 	//dayNumSQL := "SELECT day FROM gamedb WHERE ID='0';"
 	var dayNum int
-	err = dbx.Get(&dayNum, tmpString)
-	CheckErr(err, true)
+	database.QueryRow(tmpString).Scan(&dayNum)
+	fmt.Println("Day:", dayNum)
+
 	dayNum++
 	fmt.Println("Day:", dayNum)
 
@@ -74,56 +73,58 @@ func main() {
 
 }
 
-func RunDay() {
+func RunDay() error {
 	var count int // count of alive savages
 	fmt.Println("Running a day.")
 
 	// Increment the day.
 	tmpString := fmt.Sprintf("UPDATE %s SET day = day + 1 WHERE ID='0';", GAMEDBTABLE)
 	//s := "UPDATE gamedb SET day = day + 1 WHERE ID='0';"
-	tx := dbx.MustBegin()
-	tx.MustExec(tmpString)
-	tx.Commit()
+	statement, err := database.Prepare(tmpString)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	_, err = statement.Exec()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
 
 	tmpString = fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE health > 0;", SAVAGETABLE)
-	err := dbx.Get(&count, tmpString)
-	_ = CheckErr(err, true)
+	err = database.QueryRow(tmpString).Scan(&count)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
 
 	fmt.Println("There are", count, "savages alive.")
 
 	s := fmt.Sprintf("SELECT * FROM %s WHERE health > 0;", SAVAGETABLE)
-	rows1, err := dbx.Queryx(s)
-	_ = CheckErr(err, true)
-	for rows1.Next() {
+	rows, err := database.Query(s)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	for rows.Next() {
 		var ss Sav
-		err := rows1.StructScan(&ss)
-		_ = CheckErr(err, true)
-		fmt.Println(ss)
+		err := rows.Scan(&ss)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
 		savs = append(savs, ss)
 	}
 
-	//dbx.Select(&savs, s)
 	fmt.Println("dbloaded", len(savs))
-	/*
-		rows, err := dbx.Queryx(s)
-		_ = CheckErr(err, true)
-		for rows.Next() {
-			err := rows.StructScan(&ss)
-			_ = CheckErr(err, true)
-			savs = append(savs, ss)
-		}
-	*/
+
 	fmt.Println("Completed")
-	for _, j := range savs {
-		fmt.Println(j)
-	}
-	//err = dbx.Select(&savages, "SELECT * FROM savage WHERE health > 0;")
-	//CheckErr(err, true)
+	// for _, j := range savs {
+	// 	fmt.Println(j)
+	// }
 
-	// Load the distances into memory.
 	var distances []distance
-
-	//distances = make([]distance, count*count)
 
 	for i := 0; i < count-1; i++ {
 		for j := i + 1; j < count; j++ {
@@ -192,6 +193,8 @@ func RunDay() {
 			}
 		}
 	*/
+
+	return nil
 }
 
 // Get the next savage id from the database

@@ -4,7 +4,6 @@ go 1.20
 
 require (
 	github.com/glebarez/go-sqlite v1.21.1
-	github.com/jmoiron/sqlx v1.3.5
 	github.com/misterunix/sniffle v1.0.1
 )
 

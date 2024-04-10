@@ -8,6 +8,7 @@ type Sav struct {
 	Location     int    // The location of the savage. Y * maxX + X
 	FirstName    string // The first name of the savage.
 	LastName     string // The last name of the savage.
+	Generation   int    // The generation of the savage.
 	Age          int    // The age of the savage.
 	Sex          uint8  // 0 male / 1 female
 	Pregnant     int8   // days till birth count down. -1 not pregnant.
@@ -43,7 +44,7 @@ type user struct {
 	Password string
 }
 
-type log struct {
+type tlog struct {
 	ID      int
 	Date    int
 	Who     int

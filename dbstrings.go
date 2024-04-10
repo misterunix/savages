@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"reflect"
 )
@@ -63,8 +64,9 @@ func CreateTableFromStruct(table string, s interface{}) string {
 	}
 
 	// such a crappy way to do this. Return to this at a later date.
-	sqlstatement = sqlstatement[1:] // remove the first comma
-	sqlstatement += ")"
+	//sqlstatement = sqlstatement[1:] // remove the first comma
+	sqlstatement = strings.TrimPrefix(sqlstatement, ",")
+	sqlstatement += ");"
 	sqlstatement = sqlstatement1 + sqlstatement
 
 	return sqlstatement
