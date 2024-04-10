@@ -22,6 +22,8 @@ bejayart
 *.xcf
 *.txt
 *.xz
+*.db
+*.log
 
 bin/*
 !boys.txt

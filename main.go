@@ -15,8 +15,9 @@ func main() {
 	fmt.Println("Starting Savages.")
 	fmt.Println("Version:", VERSION)
 
-	log.SetOutput(os.Stdout)
-	log.SetFlags(log.Llongfile)
+	setupLog()
+	//log.SetOutput(os.Stdout)
+	//log.SetFlags(log.Llongfile)
 
 	//rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
 	//r := rand.IntN(100)
@@ -85,7 +86,7 @@ func main() {
 			cleanExit(1)
 		}
 	}
-
+	cleanExit(0)
 }
 
 func setupLog() error {
