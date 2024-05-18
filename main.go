@@ -135,8 +135,16 @@ func RunDay() error {
 		return err
 	}
 
-	tmpString = fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE health > 0;", SAVAGETABLE)
-	err = database.QueryRow(tmpString).Scan(&count)
+	err = ageSavages()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	count, err = getCountOfSavages()
+
+	// tmpString = fmt.Sprintf("SELECT COUNT(*) FROM %s WHERE health > 0;", SAVAGETABLE)
+	// err = database.QueryRow(tmpString).Scan(&count)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -203,50 +211,50 @@ func RunDay() error {
 	//
 	// Age the savages.
 	//
-	/*
-		o := "BEGIN;\n"
-		beginstatement, err := database.Prepare(o)
-		_ = CheckErr(err, true)
-		_, err = beginstatement.Exec()
-		_ = CheckErr(err, true)
-		for i := 0; i < c; i++ {
-			id := savages[i].ID
-			sql1 := "UPDATE savage SET age = age + 1 WHERE id = '" + fmt.Sprintf("%d", id) + "';"
-			statement, err := database.Prepare(sql1)
-			_ = CheckErr(err, true)
-			_, err = statement.Exec()
-			_ = CheckErr(err, true)
-		}
-		o = "COMMIT;\n"
-		beginstatement, err = database.Prepare(o)
-		_ = CheckErr(err, true)
-		_, err = beginstatement.Exec()
-		_ = CheckErr(err, true)
 
-		//
-		//
-		//
+	// o := "BEGIN;\n"
+	// beginstatement, err := database.Prepare(o)
+	// _ = CheckErr(err, true)
+	// _, err = beginstatement.Exec()
+	// _ = CheckErr(err, true)
+	// for i := 0; i < count; i++ {
+	// 	id := savs[i].ID
+	// 	sql1 := "UPDATE sav SET age = age + 1 WHERE id = '" + fmt.Sprintf("%d", id) + "';"
+	// 	statement, err := database.Prepare(sql1)
+	// 	_ = CheckErr(err, true)
+	// 	_, err = statement.Exec()
+	// 	_ = CheckErr(err, true)
+	// }
+	// o = "COMMIT;\n"
+	// beginstatement, err = database.Prepare(o)
+	// _ = CheckErr(err, true)
+	// _, err = beginstatement.Exec()
+	// _ = CheckErr(err, true)
 
-		fmt.Println("Distances")
-		for _, d := range distances {
-			if d.Distance < 11 {
-				//fmt.Println(d)
-				if savages[d.ID1].Sex != savages[d.ID2].Sex {
-					//fmt.Println("Breed?")
-					if savages[d.ID1].Pregnant != -1 || savages[d.ID2].Pregnant != -1 {
-						// someone is already pregnant
-						continue
-					}
+	// //
+	// //
+	// //
 
-					if savages[d.ID1].Age >= 14 && savages[d.ID2].Age >= 14 {
-						breed(d.ID1, d.ID2)
-					}
+	// fmt.Println("Distances")
+	// for _, d := range distances {
+	// 	if d.Distance < 11 {
+	// 		//fmt.Println(d)
+	// 		if savs[d.ID1].Sex != savs[d.ID2].Sex {
+	// 			//fmt.Println("Breed?")
+	// 			if savs[d.ID1].Pregnant != -1 || savs[d.ID2].Pregnant != -1 {
+	// 				// someone is already pregnant
+	// 				continue
+	// 			}
 
-					//fmt.Println("Next savage id:", getNextSavageID())
-				}
-			}
-		}
-	*/
+	// 			if savs[d.ID1].Age >= 14 && savs[d.ID2].Age >= 14 {
+	// 				breed(d.ID1, d.ID2)
+	// 			}
+
+	// 			//fmt.Println("Next savage id:", getNextSavageID())
+	// 		}
+	// 	}
+	// }
+
 	fmt.Println("Day completed")
 	return nil
 }
